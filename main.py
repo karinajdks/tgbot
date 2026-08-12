@@ -13,7 +13,7 @@ dp = Dispatcher()
 
 # ⚠️ ЗАМЕНИТЕ ЭТО НА ID ВАШЕГО КАНАЛА
 # Узнать ID можно через @userinfobot
-CHANNEL_ID = 8851394534  # <--- ПОДСТАВЬТЕ СВОЙ ID
+CHANNEL_ID = -1004291936681  # <--- ПОДСТАВЬТЕ СВОЙ ID
 
 # Ссылка на канал (для кнопки)
 CHANNEL_LINK = "https://t.me/+sJAMqlsvbLxlOGIy"
