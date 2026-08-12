@@ -3,10 +3,8 @@ import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import (
-    InlineKeyboardMarkup, 
-    InlineKeyboardButton,
-    ReplyKeyboardMarkup,
-    KeyboardButton,
+    InlineKeyboardMarkup, InlineKeyboardButton,
+    ReplyKeyboardMarkup, KeyboardButton,
     ReplyKeyboardRemove
 )
 
@@ -58,12 +56,12 @@ async def handle_join_request(update: types.ChatJoinRequest):
         print(f"❌ Ошибка прав: {e}")
         return
     
-    # 1. ОТПРАВЛЯЕМ СООБЩЕНИЕ С БОЛЬШОЙ КНОПКОЙ (Reply Keyboard)
+    # ОТПРАВЛЯЕМ СООБЩЕНИЕ С ОГРОМНОЙ КНОПКОЙ
     try:
-        # Создаем большую кнопку внизу экрана
+        # Создаем клавиатуру с одной большой кнопкой
         keyboard = ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="✅ Я ЧЕЛОВЕК!")]  # Одна большая кнопка
+                [KeyboardButton(text="✅ Я ЧЕЛОВЕК!")]  # Одна кнопка на всю ширину
             ],
             resize_keyboard=True,  # Подгоняем размер
             one_time_keyboard=True  # Кнопка исчезнет после нажатия
@@ -71,9 +69,7 @@ async def handle_join_request(update: types.ChatJoinRequest):
         
         await bot.send_message(
             chat_id=user_id,
-            text=(
-                f"{user_name}, подтвердите, что вы не робот 🤖"
-            ),
+            text=f"{user_name}, подтвердите, что вы не робот 🤖",
             reply_markup=keyboard
         )
         print(f"✅ Verification message sent to user {user_id}")
@@ -92,20 +88,19 @@ async def process_human_button(message: types.Message):
     
     print(f"🔘 User {user_id} ({user_name}) pressed 'Я ЧЕЛОВЕК!'")
     
-    # Убираем клавиатуру
+    # Убираем клавиатуру, чтобы она не висела внизу
     try:
         await bot.send_message(
             chat_id=user_id,
             text="✅",
             reply_markup=ReplyKeyboardRemove()
         )
-        print(f"✅ Removed keyboard")
     except Exception as e:
         print(f"❌ Could not remove keyboard: {e}")
     
-    # 2. ОТПРАВЛЯЕМ СООБЩЕНИЕ С ДОСТУПОМ И КНОПКОЙ "ПЕРЕЙТИ В КАНАЛ"
+    # ОТПРАВЛЯЕМ СООБЩЕНИЕ С ДОСТУПОМ
     try:
-        # Зеленая кнопка (Inline кнопка со ссылкой)
+        # Ссылка-кнопка (цвет зависит от темы пользователя)
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(
@@ -127,7 +122,7 @@ async def process_human_button(message: types.Message):
     except Exception as e:
         print(f"❌ Could not send access message: {e}")
     
-    # 3. ОДОБРЯЕМ ЗАЯВКУ
+    # ОДОБРЯЕМ ЗАЯВКУ
     try:
         await bot.approve_chat_join_request(chat_id=CHANNEL_ID, user_id=user_id)
         print(f"✅ Join request approved for user {user_id}")
