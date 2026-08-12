@@ -56,6 +56,7 @@ async def handle_join_request(update: types.ChatJoinRequest):
         return
     
     try:
+        # Reply Keyboard - большая кнопка внизу
         keyboard = ReplyKeyboardMarkup(
             keyboard=[
                 [KeyboardButton(text="Я НЕ РОБОТ")]
@@ -77,7 +78,7 @@ async def handle_join_request(update: types.ChatJoinRequest):
         except Exception as e2:
             print(f"Could not approve: {e2}")
 
-# --- ОБРАБОТЧИК НАЖАТИЯ КНОПКИ ---
+# --- ОБРАБОТЧИК НАЖАТИЯ КНОПКИ "Я НЕ РОБОТ" ---
 @dp.message(lambda message: message.text == "Я НЕ РОБОТ")
 async def process_human_button(message: types.Message):
     user_id = message.from_user.id
@@ -93,13 +94,14 @@ async def process_human_button(message: types.Message):
     except Exception as e:
         print(f"Could not remove keyboard: {e}")
     
-    # ОТПРАВЛЯЕМ СООБЩЕНИЕ С ДОСТУПОМ
+    # ОТПРАВЛЯЕМ СООБЩЕНИЕ С ДОСТУПОМ И КНОПКОЙ-ССЫЛКОЙ
     try:
+        # Inline Keyboard - кнопка-ссылка (внутри сообщения)
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(
                     text="Перейти в канал", 
-                    url=CHANNEL_LINK
+                    url=CHANNEL_LINK  # <-- ЭТО ССЫЛКА, а не текст!
                 )]
             ]
         )
