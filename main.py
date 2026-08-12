@@ -61,7 +61,7 @@ async def handle_join_request(update: types.ChatJoinRequest):
         # Создаем клавиатуру с одной большой кнопкой
         keyboard = ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="✅ Я ЧЕЛОВЕК!")]  # Одна кнопка на всю ширину
+                [KeyboardButton(text="Я НЕ РОБОТ!")]  # Одна кнопка на всю ширину
             ],
             resize_keyboard=True,  # Подгоняем размер
             one_time_keyboard=True  # Кнопка исчезнет после нажатия
@@ -81,7 +81,7 @@ async def handle_join_request(update: types.ChatJoinRequest):
             print(f"❌ Could not approve: {e2}")
 
 # --- ОБРАБОТЧИК НАЖАТИЯ КНОПКИ "Я ЧЕЛОВЕК!" ---
-@dp.message(lambda message: message.text == "✅ Я ЧЕЛОВЕК!")
+@dp.message(lambda message: message.text == "Я НЕ РОБОТ!")
 async def process_human_button(message: types.Message):
     user_id = message.from_user.id
     user_name = message.from_user.first_name
@@ -92,7 +92,6 @@ async def process_human_button(message: types.Message):
     try:
         await bot.send_message(
             chat_id=user_id,
-            text="✅",
             reply_markup=ReplyKeyboardRemove()
         )
     except Exception as e:
@@ -101,20 +100,22 @@ async def process_human_button(message: types.Message):
     # ОТПРАВЛЯЕМ СООБЩЕНИЕ С ДОСТУПОМ
     try:
         # Ссылка-кнопка (цвет зависит от темы пользователя)
-        keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(
-                    text="📢 Перейти в канал", 
-                    url=CHANNEL_LINK
-                )]
-            ]
-        )
+        # Создаем зеленую (success) кнопку
+keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(
+            text="📢 Перейти в канал", 
+            url=CHANNEL_LINK,
+            style=ButtonStyle.SUCCESS  # <-- Вот так!
+        )]
+    ]
+)
         
         await bot.send_message(
             chat_id=user_id,
             text=(
-                "✅ Вам предоставлен доступ в закрытый канал!\n\n"
-                "🏢 Лучшие акции и предложения от застройщиков Казани"
+                "Вам предоставлен доступ в закрытый канал!\n\n"
+                "Лучшие акции и предложения от застройщиков Казани"
             ),
             reply_markup=keyboard
         )
