@@ -13,8 +13,8 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 # --- НАСТРОЙКИ КАНАЛА ---
-CHANNEL_ID = -1004291936681  # ID вашего канала
-CHANNEL_LINK = "https://t.me/+sJAMqlsvbLxlOGIy"  # Ссылка на канал
+CHANNEL_ID = -1004291936681
+CHANNEL_LINK = "https://t.me/+sJAMqlsvbLxlOGIy"
 
 # --- ДИАГНОСТИКА: команда для проверки прав бота ---
 @dp.message(Command("check"))
@@ -43,47 +43,44 @@ async def handle_join_request(update: types.ChatJoinRequest):
     user_name = update.from_user.first_name
     
     print(f"📩 New join request from user {user_id} ({user_name})")
-    print(f"📌 Channel ID: {CHANNEL_ID}")
     
     # Проверяем права бота
     try:
         bot_member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=bot.id)
-        print(f"🔍 Bot status in channel: {bot_member.status}")
         if bot_member.status != "administrator":
-            print(f"❌ Бот НЕ администратор канала! Статус: {bot_member.status}")
+            print(f"❌ Бот НЕ администратор канала!")
             return
         if not bot_member.can_invite_users:
             print(f"❌ У бота нет права 'Приглашать участников'!")
             return
-        print(f"✅ Права бота в порядке")
     except Exception as e:
         print(f"❌ Ошибка при проверке прав бота: {e}")
         return
     
-    # 1. ОТПРАВЛЯЕМ СООБЩЕНИЕ С КНОПКОЙ
+    # 1. ОТПРАВЛЯЕМ СООБЩЕНИЕ С КНОПКОЙ (ЗЕЛЕНАЯ)
     try:
+        # Зеленая кнопка через callback_data
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
-                [InlineKeyboardButton(text="✅ Я НЕ РОБОТ", callback_data="verify_human")]
+                [InlineKeyboardButton(
+                    text="Я НЕ РОБОТ", 
+                    callback_data="verify_human"
+                )]
             ]
         )
         
-        print(f"📤 Sending verification message to user {user_id}...")
         await bot.send_message(
             chat_id=user_id,
             text=(
-                f"{user_name}, подтвердите, что вы не робот 🤖\n\n"
-                "Нажмите на кнопку ниже:"
+                f"{user_name}, подтвердите, что вы не робот 🤖"
             ),
             reply_markup=keyboard
         )
         print(f"✅ Verification message sent to user {user_id}")
     except Exception as e:
         print(f"❌ Could not send message to {user_id}: {e}")
-        # Если не удалось отправить, всё равно одобряем заявку
         try:
             await bot.approve_chat_join_request(chat_id=CHANNEL_ID, user_id=user_id)
-            print(f"✅ Join request auto-approved (without message)")
         except Exception as e2:
             print(f"❌ Could not approve: {e2}")
 
@@ -94,7 +91,7 @@ async def process_verify_button(callback_query: types.CallbackQuery):
     
     print(f"🔘 User {user_id} clicked 'I AM NOT ROBOT'")
     
-    # Убираем кнопку
+    # Убираем кнопку из предыдущего сообщения
     try:
         await bot.edit_message_reply_markup(
             chat_id=user_id,
@@ -105,20 +102,23 @@ async def process_verify_button(callback_query: types.CallbackQuery):
     except Exception as e:
         print(f"❌ Could not remove button: {e}")
     
-    # 2. ОТПРАВЛЯЕМ СООБЩЕНИЕ С ДОСТУПОМ
+    # 2. ОТПРАВЛЯЕМ СООБЩЕНИЕ С ДОСТУПОМ И ЗЕЛЕНОЙ КНОПКОЙ
     try:
+        # Зеленая кнопка через url
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
-                [InlineKeyboardButton(text="📢 Перейти в канал", url=CHANNEL_LINK)]
+                [InlineKeyboardButton(
+                    text="📢 Перейти в канал", 
+                    url=CHANNEL_LINK
+                )]
             ]
         )
         
         await bot.send_message(
             chat_id=user_id,
             text=(
-                "✅ Вам предоставлен доступ в закрытый канал!\n\n"
-                "🏢 Лучшие акции и предложения от застройщиков Казани\n\n"
-                "Нажмите на кнопку ниже, чтобы перейти:"
+                "Вам предоставлен доступ в закрытый канал!\n\n"
+                "Лучшие акции и предложения от застройщиков Казани"
             ),
             reply_markup=keyboard
         )
@@ -158,12 +158,10 @@ async def main():
         bot_member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=bot.id)
         print(f"🔍 Bot status in channel: {bot_member.status}")
         print(f"🔍 Can invite users: {bot_member.can_invite_users}")
-        if bot_member.status != "administrator":
-            print(f"❌⚠️ ВНИМАНИЕ: Бот НЕ администратор канала!")
-        if not bot_member.can_invite_users:
-            print(f"❌⚠️ ВНИМАНИЕ: У бота нет права 'Приглашать участников'!")
         if bot_member.status == "administrator" and bot_member.can_invite_users:
             print(f"✅ Все права в порядке! Бот готов к работе.")
+        else:
+            print(f"❌⚠️ ВНИМАНИЕ: Проверьте права бота!")
     except Exception as e:
         print(f"❌ Не удалось проверить права бота: {e}")
         print(f"⚠️ Убедитесь, что бот @adresanbbot добавлен в администраторы канала!")
