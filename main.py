@@ -2,6 +2,7 @@ import os
 import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
+from aiogram.enums import ButtonStyle
 from aiogram.types import (
     InlineKeyboardMarkup, InlineKeyboardButton,
     ReplyKeyboardMarkup, KeyboardButton,
@@ -58,7 +59,10 @@ async def handle_join_request(update: types.ChatJoinRequest):
     try:
         keyboard = ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="✅ Я НЕ РОБОТ")]
+                [KeyboardButton(
+                    text="Я НЕ РОБОТ",
+                    style=ButtonStyle.SUCCESS
+                )]
             ],
             resize_keyboard=True,
             one_time_keyboard=True
@@ -77,28 +81,30 @@ async def handle_join_request(update: types.ChatJoinRequest):
         except Exception as e2:
             print(f"❌ Could not approve: {e2}")
 
-# --- ОБРАБОТЧИК НАЖАТИЯ КНОПКИ ---
-@dp.message(lambda message: message.text == "✅ Я НЕ РОБОТ")
+# --- ОБРАБОТЧИК НАЖАТИЯ КНОПКИ "Я НЕ РОБОТ" ---
+@dp.message(lambda message: message.text == "Я НЕ РОБОТ")
 async def process_human_button(message: types.Message):
     user_id = message.from_user.id
     
     print(f"🔘 User {user_id} pressed 'Я НЕ РОБОТ'")
     
+    # Убираем клавиатуру (БЕЗ отправки галочки)
     try:
         await bot.send_message(
             chat_id=user_id,
-            text="✅",
             reply_markup=ReplyKeyboardRemove()
         )
     except Exception as e:
         print(f"❌ Could not remove keyboard: {e}")
     
+    # ОТПРАВЛЯЕМ СООБЩЕНИЕ С ДОСТУПОМ
     try:
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(
                     text="📢 Перейти в канал", 
-                    url=CHANNEL_LINK
+                    url=CHANNEL_LINK,
+                    style=ButtonStyle.SUCCESS
                 )]
             ]
         )
@@ -106,8 +112,8 @@ async def process_human_button(message: types.Message):
         await bot.send_message(
             chat_id=user_id,
             text=(
-                "✅ Вам предоставлен доступ в закрытый канал!\n\n"
-                "🏢 Лучшие акции и предложения от застройщиков Казани"
+                "Вам предоставлен доступ в закрытый канал!\n\n"
+                "Лучшие акции и предложения от застройщиков Казани"
             ),
             reply_markup=keyboard
         )
@@ -115,6 +121,7 @@ async def process_human_button(message: types.Message):
     except Exception as e:
         print(f"❌ Could not send access message: {e}")
     
+    # ОДОБРЯЕМ ЗАЯВКУ
     try:
         await bot.approve_chat_join_request(chat_id=CHANNEL_ID, user_id=user_id)
         print(f"✅ Join request approved for user {user_id}")
