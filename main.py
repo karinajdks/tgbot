@@ -2,7 +2,6 @@ import os
 import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.enums import ButtonStyle  # <-- ВАЖНО: импорт для цветных кнопок
 from aiogram.types import (
     InlineKeyboardMarkup, InlineKeyboardButton,
     ReplyKeyboardMarkup, KeyboardButton,
@@ -44,7 +43,6 @@ async def handle_join_request(update: types.ChatJoinRequest):
     
     print(f"📩 New join request from user {user_id} ({user_name})")
     
-    # Проверяем права бота
     try:
         bot_member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=bot.id)
         if bot_member.status != "administrator":
@@ -57,14 +55,10 @@ async def handle_join_request(update: types.ChatJoinRequest):
         print(f"❌ Ошибка прав: {e}")
         return
     
-    # ОТПРАВЛЯЕМ СООБЩЕНИЕ С БОЛЬШОЙ ЗЕЛЕНОЙ КНОПКОЙ
     try:
         keyboard = ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(
-                    text="✅ Я НЕ РОБОТ",
-                    style=ButtonStyle.SUCCESS  # <-- ЗЕЛЕНАЯ кнопка
-                )]
+                [KeyboardButton(text="✅ Я НЕ РОБОТ")]
             ],
             resize_keyboard=True,
             one_time_keyboard=True
@@ -83,15 +77,13 @@ async def handle_join_request(update: types.ChatJoinRequest):
         except Exception as e2:
             print(f"❌ Could not approve: {e2}")
 
-# --- ОБРАБОТЧИК НАЖАТИЯ КНОПКИ "✅ Я НЕ РОБОТ" ---
+# --- ОБРАБОТЧИК НАЖАТИЯ КНОПКИ ---
 @dp.message(lambda message: message.text == "✅ Я НЕ РОБОТ")
 async def process_human_button(message: types.Message):
     user_id = message.from_user.id
-    user_name = message.from_user.first_name
     
-    print(f"🔘 User {user_id} ({user_name}) pressed 'Я НЕ РОБОТ'")
+    print(f"🔘 User {user_id} pressed 'Я НЕ РОБОТ'")
     
-    # Убираем клавиатуру
     try:
         await bot.send_message(
             chat_id=user_id,
@@ -101,14 +93,12 @@ async def process_human_button(message: types.Message):
     except Exception as e:
         print(f"❌ Could not remove keyboard: {e}")
     
-    # ОТПРАВЛЯЕМ СООБЩЕНИЕ С ДОСТУПОМ И ЗЕЛЕНОЙ КНОПКОЙ
     try:
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(
                     text="📢 Перейти в канал", 
-                    url=CHANNEL_LINK,
-                    style=ButtonStyle.SUCCESS  # <-- ЗЕЛЕНАЯ кнопка
+                    url=CHANNEL_LINK
                 )]
             ]
         )
@@ -125,7 +115,6 @@ async def process_human_button(message: types.Message):
     except Exception as e:
         print(f"❌ Could not send access message: {e}")
     
-    # ОДОБРЯЕМ ЗАЯВКУ
     try:
         await bot.approve_chat_join_request(chat_id=CHANNEL_ID, user_id=user_id)
         print(f"✅ Join request approved for user {user_id}")
